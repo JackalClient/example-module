@@ -1,0 +1,7 @@
+EXPORTS
+    JcExtensionAbiVersion
+    JcExtensionInitialize
+    ExampleEnable
+    ExampleDisable
+    ExampleIsEnabled
+    ExampleUpdate

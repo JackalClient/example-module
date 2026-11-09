@@ -1,0 +1,9 @@
+Watched Module;观察模块
+Notify Changes;通知变化
+Control Watched Module;联动观察模块
+Restore On Disable;停用时恢复
+Run Command On Enable;观察模块启用时执行命令
+Enable Command;启用命令
+Run Command On Disable;观察模块停用时执行命令
+Disable Command;停用命令
+Activation Count;启用次数

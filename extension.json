@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "id": "example-module",
+  "name": "ExampleExtension",
+  "version": "1.1.0",
+  "publisher": "Jackal SDK Examples",
+  "origin": "market",
+  "description": {"en": "A native SDK example that watches module switches and configuration, supplies translations, and optionally controls a module or runs commands.", "zh": "原生 SDK 示例：观察模块开关和配置变化，自带翻译词条，可选联动开关和执行客户端命令。"},
+  "icon": "icon",
+  "tags": ["Example", "SDK"],
+  "files": {
+    "native-x86": {"path": "example-module-x86.dll", "kind": "dll", "architecture": "x86", "size": 238592, "sha256": "0abfcbe5940d707f8f9856115217959c0acf311428a22a534d7108dc73712a04"},
+    "native-x64": {"path": "example-module-x64.dll", "kind": "dll", "architecture": "x64", "size": 289280, "sha256": "b2ba9d959059faec7e02a8958931e616daeb2b009b014c1618bbcb943c183d2d"},
+    "dictionary": {"path": "Dictionary.txt", "kind": "data", "architecture": "any", "size": 333, "sha256": "d7e6e01ded940b25ba2608a57b461486fe39f86e101e78b1ffe4c3b268e943b8"},
+    "icon": {"path": "example.png", "kind": "data", "architecture": "any", "size": 2088, "sha256": "743830914ec922f1888ff698a624887bae7646929b4bf865eeb83c22271932ca"}
+  },
+  "contributes": {"Dictionary": ["dictionary"]},
+  "native": {"x86": "native-x86", "x64": "native-x64"},
+  "modules": [{
+    "key": "companion",
+    "name": "ExampleExtension",
+    "displayName": {"en": "ExampleExtension", "zh": "示例扩展"},
+    "description": {"en": "Watches another module's switch and configuration, reports changes, and can run separate commands when the watched module turns on or off.", "zh": "观察另一个模块的开关和配置变化，可分别在目标开启、关闭时执行命令，并演示可选的模块联动。"},
+    "category": "Misc",
+    "attributes": [],
+    "defaults": {
+      "Enabled": false,
+      "hidden": false,
+      "Watched Module": "Clock",
+      "Notify Changes": true,
+      "Control Watched Module": false,
+      "Restore On Disable": true,
+      "Run Command On Enable": false,
+      "Enable Command": "/about",
+      "Run Command On Disable": false,
+      "Disable Command": "/about",
+      "Message": {"TextArea": "ExampleExtension is watching module changes.", "Rows": 3, "MaxLength": 1000},
+      "Notification Level": {"Options": ["info", "success", "warning", "error"], "Selected": "info"},
+      "Activation Count": 0,
+      "Groups": {
+        "Monitor": {"DefaultOpen": true, "Items": ["Watched Module", "Notify Changes", "Message", "Notification Level", "Activation Count"]},
+        "Automation": {"Items": ["Control Watched Module", "Restore On Disable", "Run Command On Enable", "Enable Command", "Run Command On Disable", "Disable Command"]}
+      },
+      "VisibleWhenBatch": [
+        {"Items": ["Restore On Disable"], "When": {"Key": "Control Watched Module", "Equals": true}},
+        {"Items": ["Enable Command"], "When": {"Key": "Run Command On Enable", "Equals": true}},
+        {"Items": ["Disable Command"], "When": {"Key": "Run Command On Disable", "Equals": true}}
+      ]
+    },
+    "optionDescriptions": {
+      "Watched Module": {"en": "Use the original English module name, for example Clock. Changes apply after toggling this module.", "zh": "填写原始英文模块名，例如 Clock。修改后重新启用本模块生效。"},
+      "Control Watched Module": {"en": "Requests activation using the client's normal permission and confirmation checks.", "zh": "通过客户端正常权限检查和确认流程请求开启目标模块。"},
+      "Notify Changes": {"en": "Reports changes to the watched module's switch and configuration while this extension module is enabled.", "zh": "本扩展模块开启期间，通知观察目标的开关及配置变化。"},
+      "Enable Command": {"en": "One client command beginning with /. Runs when the watched module switches on, not when this extension module starts.", "zh": "以 / 开头的单条客户端命令，观察目标由关变开时执行，而非启动本扩展时执行。"},
+      "Disable Command": {"en": "One client command beginning with /. Runs when the watched module switches off.", "zh": "以 / 开头的单条客户端命令，观察目标由开变关时执行。"}
+    },
+    "behaviors": {"enable": "ExampleEnable", "disable": "ExampleDisable", "isEnabled": "ExampleIsEnabled", "update": "ExampleUpdate"},
+    "pollIntervalMs": 1000
+  }]
+}
