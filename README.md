@@ -13,7 +13,35 @@
 
 ## 构建
 
-需要 Windows、Visual Studio C++、CMake 和 nlohmann-json。SDK 位于同级 `../sdk`。独立上传 GitHub 时将 `sdk` 一并放在同级目录，或调整 CMake 的 include 路径。
+需要 Windows、Visual Studio C++、CMake 和 nlohmann-json。提前下载 `JackalExtensionSDK`，将它与本扩展目录放在同一父目录下：
+
+```text
+workspace/
+├─ JackalExtensionSDK/
+│  ├─ jackal_extension.h
+│  └─ jackal_extension.hpp
+└─ example-module/
+   ├─ CMakeLists.txt
+   ├─ example.cpp
+   └─ extension.json
+```
+
+CMake 使用 `../JackalExtensionSDK/` 作为头文件搜索路径，源码即可包含 `jackal_extension.hpp`。SDK 的入门说明位于同级 `../JackalExtensionSDK/README.md`，完整用法见[官网教程](https://doc.wormwake.com/extension-sdk.html)。
+
+安装依赖：
+
+```powershell
+vcpkg install nlohmann-json:x64-windows-static nlohmann-json:x86-windows-static
+```
+
+单独下载本示例后，在本目录执行，使用自己的 vcpkg 安装前缀：
+
+```powershell
+cmake -S . -B ../build/example-module-x64 -A x64 -DCMAKE_PREFIX_PATH="$env:VCPKG_ROOT/installed/x64-windows-static"
+cmake --build ../build/example-module-x64 --config Release
+cmake -S . -B ../build/example-module-x86 -A Win32 -DCMAKE_PREFIX_PATH="$env:VCPKG_ROOT/installed/x86-windows-static"
+cmake --build ../build/example-module-x86 --config Release
+```
 
 在仓库根目录执行，使用现有 vcpkg 安装前缀（按本机实际路径修改）：
 
@@ -25,6 +53,8 @@ cmake --build build/example-module-x86 --config Release
 ```
 
 直接在本目录生成 `example-module-x86.dll` 与 `example-module-x64.dll`；中间构建文件仍位于仓库根目录的 `build/`。清单同时声明两种位数，因此两者必须都存在才能导入、打包或发布。
+
+独立下载的示例则把中间文件放在上级目录的 `build/`。重新构建后，应更新清单中所有已登记文件的 `size`、`sha256`；本地调试也可先移除这两个校验字段，由客户端导入时计算。检查方法及发布步骤见同级 `../JackalExtensionSDK/README.md` 的“安装与发布”一节及[官网教程](https://doc.wormwake.com/extension-sdk.html)。
 
 ## 使用与发布
 
