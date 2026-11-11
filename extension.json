@@ -4,6 +4,7 @@
   "name": "ExampleExtension",
   "version": "1.1.2",
   "publisher": "Wormwaker",
+  "github": "https://github.com/JackalClient/example-module",
   "origin": "market",
   "description": {"en": "A native SDK example that watches module switches and configuration, supplies translations, and optionally controls a module or runs commands.", "zh": "原生 SDK 示例：观察模块开关和配置变化，自带翻译词条，可选联动开关和执行客户端命令。"},
   "icon": "icon",
