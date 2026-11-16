@@ -7,6 +7,16 @@
 
 `Run Command On Enable` / `Enable Command` 在观察目标由关变开时执行；`Run Command On Disable` / `Disable Command` 在观察目标由开变关时执行，不再因启动本扩展而执行。
 
+示例还注册 `/example`、`/example echo`、`/example types` 三个命令：
+
+```text
+/example
+/example echo "hello world"
+/example types sample 3 1.25 true fast alpha,beta C:/temp Clock /about {"source":"test"}
+```
+
+`types` 覆盖字符串、整数、浮点数、布尔、枚举、枚举列表、路径、模块、命令和 JSON 参数。命令清单同时演示静态补全追加、对 `/version` 的 before/after 钩子、命令替换和结果覆写；测试参数分别为 `--example-replace`、`--example-override`、`--example-after-override`。
+
 新增词典词条位于本扩展的 `Dictionary.txt`，通过清单 `contributes.Dictionary` 引用并随扩展一起打包；安装后补充到内存词典。公共词条优先，扩展之间同名词条按扩展 ID 排序取第一项。
 
 在编写扩展时，请额外注意 `extension.json` 的书写，包括各个文件的类型与哈希等，注意格式。
@@ -41,6 +51,8 @@ cmake -S . -B ../build/example-module-x64 -A x64 -DCMAKE_PREFIX_PATH="$env:VCPKG
 cmake --build ../build/example-module-x64 --config Release
 cmake -S . -B ../build/example-module-x86 -A Win32 -DCMAKE_PREFIX_PATH="$env:VCPKG_ROOT/installed/x86-windows-static"
 cmake --build ../build/example-module-x86 --config Release
+ctest --test-dir ../build/example-module-x64 -C Release --output-on-failure
+ctest --test-dir ../build/example-module-x86 -C Release --output-on-failure
 ```
 
 在仓库根目录执行，使用现有 vcpkg 安装前缀（按本机实际路径修改）：
@@ -50,9 +62,11 @@ cmake -S extensions/example-module -B build/example-module-x64 -A x64 -DCMAKE_PR
 cmake --build build/example-module-x64 --config Release
 cmake -S extensions/example-module -B build/example-module-x86 -A Win32 -DCMAKE_PREFIX_PATH="$env:VCPKG_ROOT/installed/x86-windows-static"
 cmake --build build/example-module-x86 --config Release
+ctest --test-dir build/example-module-x64 -C Release --output-on-failure
+ctest --test-dir build/example-module-x86 -C Release --output-on-failure
 ```
 
-直接在本目录生成 `example-module-x86.dll` 与 `example-module-x64.dll`；中间构建文件仍位于仓库根目录的 `build/`。清单同时声明两种位数，因此两者必须都存在才能导入、打包或发布。
+`BUILD_TESTING` 默认开启，会同时编译 `example-module-tests`，验证命令参数、响应缓冲区与各个钩子动作。直接在本目录生成 `example-module-x86.dll` 与 `example-module-x64.dll`；中间构建文件仍位于仓库根目录的 `build/`。清单同时声明两种位数，因此两者必须都存在才能导入、打包或发布。
 
 独立下载的示例则把中间文件放在上级目录的 `build/`。重新构建后，应更新清单中所有已登记文件的 `size`、`sha256`；本地调试也可先移除这两个校验字段，由客户端导入时计算。检查方法及发布步骤见同级 `../JackalExtensionSDK/README.md` 的“安装与发布”一节及[官网教程](https://doc.wormwake.com/extension-sdk.html)。
 

@@ -1,4 +1,5 @@
 #include "jackal_extension.hpp"
+#include <cstring>
 #include <string>
 
 namespace {
@@ -22,10 +23,59 @@ std::string OptionText(const json& config, const char* key, const char* fallback
     if (found->is_object() && found->contains("Selected")) return found->at("Selected").get<std::string>();
     return fallback;
 }
+
+int CommandResponse(const json& response, char* buffer, uint32_t capacity, uint32_t* required) {
+    return jackal::WriteResponse(response, buffer, capacity, required);
+}
 }
 
 extern "C" uint32_t __cdecl JcExtensionAbiVersion() { return JC_EXTENSION_ABI_VERSION; }
 extern "C" int __cdecl JcExtensionInitialize(const JcExtensionHostV1* environment) { return host.initialize(environment); }
+extern "C" int __cdecl ExampleCommand(const char* requestUtf8, char* responseUtf8, uint32_t capacity, uint32_t* required) {
+    try {
+        const auto request = json::parse(requestUtf8);
+        const auto path = request.at("path").get<std::string>();
+        if (path == "/example" || path == "/ex") {
+            return CommandResponse(jackal::CommandResult(true,
+                "Usage: /example echo <text> | /example types ...", "info"), responseUtf8, capacity, required);
+        }
+        if (path == "/example echo" || path == "/ex echo") {
+            return CommandResponse(jackal::CommandResult(true,
+                request.at("arguments").at("text").get<std::string>(), "success"), responseUtf8, capacity, required);
+        }
+        if (path == "/example types") {
+            return CommandResponse(jackal::CommandResult(true,
+                request.at("arguments").dump(), "success"), responseUtf8, capacity, required);
+        }
+        return CommandResponse(jackal::CommandResult(false, "Unknown example subcommand.", "error"), responseUtf8, capacity, required);
+    }
+    catch (const std::exception& error) {
+        return CommandResponse({ { "ok", false }, { "error", error.what() } }, responseUtf8, capacity, required);
+    }
+    catch (...) {
+        return CommandResponse({ { "ok", false }, { "error", "Example command failed." } }, responseUtf8, capacity, required);
+    }
+}
+extern "C" int __cdecl ExampleCommandHook(const char* requestUtf8, char* responseUtf8, uint32_t capacity, uint32_t* required) {
+    try {
+        const auto request = json::parse(requestUtf8);
+        const auto command = request.at("command").get<std::string>();
+        const auto phase = request.at("phase").get<std::string>();
+        if (phase == "before" && command.find("--example-replace") != std::string::npos)
+            return CommandResponse(jackal::HookReplace("/version"), responseUtf8, capacity, required);
+        if (phase == "before" && command.find("--example-override") != std::string::npos)
+            return CommandResponse(jackal::HookOverride(true, "Before hook override."), responseUtf8, capacity, required);
+        if (phase == "after" && command.find("--example-after-override") != std::string::npos)
+            return CommandResponse(jackal::HookOverride(false, "After hook override.", "warning"), responseUtf8, capacity, required);
+        return CommandResponse(jackal::HookContinue(), responseUtf8, capacity, required);
+    }
+    catch (const std::exception& error) {
+        return CommandResponse({ { "ok", false }, { "error", error.what() } }, responseUtf8, capacity, required);
+    }
+    catch (...) {
+        return CommandResponse({ { "ok", false }, { "error", "Example command hook failed." } }, responseUtf8, capacity, required);
+    }
+}
 extern "C" int __cdecl ExampleEnable(const char* configUtf8) {
     if (enabled) return 1;
     try {

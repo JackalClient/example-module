@@ -1,6 +1,8 @@
 EXPORTS
     JcExtensionAbiVersion
     JcExtensionInitialize
+    ExampleCommand
+    ExampleCommandHook
     ExampleEnable
     ExampleDisable
     ExampleIsEnabled

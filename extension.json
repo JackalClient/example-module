@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "example-module",
   "name": "ExampleExtension",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "publisher": "Wormwaker",
   "github": "https://github.com/JackalClient/example-module",
   "origin": "market",
@@ -17,6 +17,66 @@
   },
   "contributes": {"Dictionary": ["dictionary"]},
   "native": {"x86": "native-x86", "x64": "native-x64"},
+  "commands": [
+    {
+      "path": "/example",
+      "aliases": ["/ex"],
+      "handler": "ExampleCommand",
+      "help": {
+        "summary": {"en": "Demonstrates extension command registration and typed arguments.", "zh": "演示扩展命令注册和类型化参数。"},
+        "usage": ["/example echo <text>", "/example types [arguments...]"],
+        "details": {"en": "The root command and each subcommand have independent manifest entries.", "zh": "主命令和每个子命令分别使用独立清单条目注册。"}
+      }
+    },
+    {
+      "path": "/example echo",
+      "aliases": ["/ex echo"],
+      "handler": "ExampleCommand",
+      "help": {
+        "summary": {"en": "Prints one string argument.", "zh": "输出一个字符串参数。"},
+        "usage": ["/example echo <text>"]
+      },
+      "arguments": [
+        {"name": "text", "type": "string", "required": true}
+      ]
+    },
+    {
+      "path": "/example types",
+      "handler": "ExampleCommand",
+      "help": {
+        "summary": {"en": "Returns the parsed integer, number, boolean, enum, list, path, module, command and JSON arguments.", "zh": "返回解析后的整数、浮点数、布尔、枚举、列表、路径、模块、命令和 JSON 参数。"},
+        "usage": ["/example types <text> [count] [ratio] [enabled] [mode] [tags] [path] [module] [command] [payload]"],
+        "details": {"en": "Arguments typed as path, module and command are validated by the client before this callback runs.", "zh": "路径、模块和命令类型会在回调执行前由客户端校验。"}
+      },
+      "arguments": [
+        {"name": "text", "type": "string", "required": true},
+        {"name": "count", "type": "integer", "default": 1},
+        {"name": "ratio", "type": "number", "default": 0.5},
+        {"name": "enabled", "type": "boolean", "default": true},
+        {"name": "mode", "type": "enum", "choices": ["safe", "fast"], "default": "safe"},
+        {"name": "tags", "type": "enum-list", "choices": ["alpha", "beta", "gamma"], "separator": ",", "default": ["alpha"]},
+        {"name": "path", "type": "path", "default": "."},
+        {"name": "module", "type": "module", "default": "Clock"},
+        {"name": "target", "type": "command", "default": "/about"},
+        {"name": "payload", "type": "json", "default": {"source": "example"}}
+      ]
+    }
+  ],
+  "commandHelp": [
+    {
+      "command": "/version",
+      "text": {"en": "Example hooks: --example-replace changes the invocation, --example-override handles it before the original command, and --example-after-override changes the result afterward.", "zh": "示例钩子：--example-replace 修改调用，--example-override 在原命令前接管，--example-after-override 在原命令后修改结果。"}
+    }
+  ],
+  "commandCompletions": [
+    {"command": "/example echo", "argument": 0, "values": ["hello", "world"]},
+    {"command": "/example types", "argument": "mode", "values": ["safe", "fast"]},
+    {"command": "/about", "argument": 0, "values": ["version", "license"]}
+  ],
+  "commandHooks": [
+    {"command": "/version", "phase": "before", "handler": "ExampleCommandHook", "priority": 0},
+    {"command": "/version", "phase": "after", "handler": "ExampleCommandHook", "priority": 0}
+  ],
   "modules": [{
     "key": "companion",
     "name": "ExampleExtension",
